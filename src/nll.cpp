@@ -55,8 +55,9 @@ static inline VectorXd softmax_impl(const VectorXd& lw) {
   if (!std::isfinite(max_finite)) return VectorXd::Zero(n);
   VectorXd w(n);
   for (int i = 0; i < n; ++i) {
-    double x = lw[i] > max_finite ? max_finite : lw[i]; // clip +Inf
-    w[i] = std::exp(x - max_finite);                    // -Inf -> 0
+    double x = (std::isnan(lw[i]) || lw[i] > max_finite)
+      ? max_finite : lw[i];                 // clip NaN and +Inf
+    w[i] = std::exp(x - max_finite);        // -Inf -> 0
   }
   double s = w.sum();
   if (s > 0.0) w /= s;
